@@ -2,7 +2,7 @@ package service
 
 import (
 	"errors"
-	"github.com/Percygu/camp_tiktok/pkg/pb"
+	"github.com/Keqing-win/camp_tiktok/pkg/pb"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
 	"strconv"

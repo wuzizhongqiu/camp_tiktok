@@ -60,9 +60,9 @@ type LogConfig struct {
 }
 
 type ConsulConfig struct {
-	Host string `mapstructure:"host"`
-	Port int    `mapstructure:"port"`
-	Tags string `mapstructure:"tags"`
+	Host string   `mapstructure:"host"`
+	Port int      `mapstructure:"port"`
+	Tags []string `mapstructure:"tags"`
 }
 
 func Init() (err error) {
