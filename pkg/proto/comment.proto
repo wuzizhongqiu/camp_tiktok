@@ -62,11 +62,10 @@ message ReplyComment{
   int64 like=6;//点赞数
 }
 
-//拉去多级评论
+//拉取多级评论
 message GetOtherCommentListReq{
   int64 video_id=1;
   int64 parent_id=2;
-  int64 reply_id=3;
 }
 
 message GetOtherCommentListRsp{
