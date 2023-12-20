@@ -37,8 +37,6 @@ message Comment{
 
 message CommentActionRsp{
   Comment comment =1;
-  int64 page=2;
-  int64 size=3;
 }
 
 //拉去一级评论时的返回的评论结构
