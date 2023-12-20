@@ -37,6 +37,8 @@ message Comment{
 
 message CommentActionRsp{
   Comment comment =1;
+  int64 page=2;
+  int64 size=3;
 }
 
 //拉去一级评论时的返回的评论结构
@@ -47,6 +49,8 @@ message CommentGet{
 
 message GetTopCommentListReq{
   int64 video_id=1;
+  int64 page=2;
+  int64 size=3;
 }
 
 message GetTopCommentListRsp{
@@ -66,6 +70,8 @@ message ReplyComment{
 message GetOtherCommentListReq{
   int64 video_id=1;
   int64 parent_id=2;
+  int64 page=3;
+  int64 size=4;
 }
 
 message GetOtherCommentListRsp{
@@ -81,7 +87,6 @@ message GetCommentNumReq{
 message GetCommentNumRsp{
   int64 sum=1;
 }
-
 
 service CommentService{
   rpc CommentTopAction(CommentActionTopReq) returns (CommentActionRsp);//发布一级评论
