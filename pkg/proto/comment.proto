@@ -13,6 +13,7 @@ message CommentActionTopReq{
   int64 video_id=2;
   string comment_text=3;
   int64 action_type=4;
+  int64 comment_id=5;
 }
 
 //发布二级评论的请求或多级评论
@@ -25,6 +26,7 @@ message CommentActionOtherReq{
   int64 reply_id=6;//回复评论的id
   int64 reply_user_id=7;//回复评论的uid
   int64 action_type=8;
+  int64 comment_id=9;
 }
 
 message Comment{
