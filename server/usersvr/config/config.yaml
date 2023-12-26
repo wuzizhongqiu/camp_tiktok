@@ -1,12 +1,12 @@
 svr_config:
   name: "usersvr"
-  host: "43.139.192.217"
+  host: "127.0.0.1"
   port: 8000
 
 
 redis:
-  host: "43.139.192.217"
-  password: "Golang12345"
+  host: "127.0.0.1"
+  password: ""
   db: 0
   port: 6379
   PoolSize: 10
@@ -32,11 +32,11 @@ redsync:
     PoolSize: 10
 
 mysql:
-  host: "43.139.192.217"
-  port: "8086"
+  host: "127.0.0.1"
+  port: "3306"
   database: "camps_tiktok"
   username: "root"
-  password: "123456"
+  password: "197920"
   max_idle_conn: 10
   max_open_conn: 100
   max_idle_time: 30
@@ -50,7 +50,7 @@ log:
   max_backups: 7
 
 consul:
-  host: "43.139.192.217"
+  host: "127.0.0.1"
   port: 8500
   tags:
     - "usersvr"

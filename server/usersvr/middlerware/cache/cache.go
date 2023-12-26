@@ -45,5 +45,6 @@ func CloseRedis() {
 }
 
 func GetRdb() *redis.Client {
+	redisSync.Do(initRedis)
 	return redisConn
 }

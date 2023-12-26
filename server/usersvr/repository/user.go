@@ -32,7 +32,7 @@ func UpdateUserFollowerNum(uid int64, actionType int64) error {
 	}
 	//查缓存是否存在
 	var flag bool
-	err, flag = CacheCheckUser(uid)
+	flag, err = CacheCheckUser(uid)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func UpdateUserFollowNum(uid int64, actionType int64) error {
 	}
 	//查缓存是否存在
 	var flag bool
-	err, flag = CacheCheckUser(uid)
+	flag, err = CacheCheckUser(uid)
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func UpdateUserFavoriteNum(uid int64, actionType int64) error {
 	}
 	//查缓存是否存在
 	var flag bool
-	err, flag = CacheCheckUser(uid)
+	flag, err = CacheCheckUser(uid)
 	if err != nil {
 		return err
 	}
@@ -145,7 +145,7 @@ func UpdateUserFavoritedNum(uid int64, actionType int64) error {
 
 	//能更新成功说明在数据库中存在
 	var flag bool
-	err, flag = CacheCheckUser(uid)
+	flag, err = CacheCheckUser(uid)
 	if err != nil {
 		return err
 	}
@@ -191,12 +191,29 @@ func GetUserInfo(u interface{}) (user User, err error) {
 	switch u.(type) {
 	case int64:
 		//先从缓存查询
-		user, err = CacheGetUserInfo(u.(int64))
-		if err == nil {
-			return user, nil
+		var flag bool
+		log.Info("开始查是否存在")
+		flag, err = CacheCheckUser(u.(int64))
+		log.Info("查询是否存在", flag, err)
+		if err != nil {
+			return
 		}
-		//去db查询
-		user, err = GetUserInfoFromDB(u.(int64))
+		if !flag { //说明过期了
+			//去db查
+			user, err = GetUserInfoFromDB(u.(int64))
+			if err != nil {
+				return
+			}
+			go CacheSetUserInfo(user)
+			log.Debug(user)
+			return
+		} else {
+			user, err = CacheGetUserInfo(u.(int64))
+			log.Debug(user)
+			if err == nil {
+				return user, nil
+			}
+		}
 	case string:
 		user, err = GetUserInfoByUserName(u.(string))
 	}

@@ -5,8 +5,6 @@ import (
 	"github.com/Keqing-win/camp_tiktok/pkg/pb"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
-	"strconv"
-	"usersvr/middlerware/lock"
 	"usersvr/repository"
 )
 
@@ -47,23 +45,23 @@ func (u *UserService) UpdateUserFavoritedCount(ctx context.Context, in *pb.Updat
 }
 
 func (u *UserService) CacheChangeUserCount(ctx context.Context, in *pb.CacheChangeUserCountReq) (*pb.CacheChangeUserCountRsp, error) {
-	uid := strconv.FormatInt(in.UserId, 10)
-	//保证同一时间只有一个操作
-	mutex := lock.GetRedSync("user_" + uid)
-	defer lock.Unlock(mutex)
+	//uid := strconv.FormatInt(in.UserId, 10)
+	////保证同一时间只有一个操作
+	//mutex := lock.GetRedSync("user_" + uid)
+	//defer lock.Unlock(mutex)
 	user, err := repository.CacheGetUserInfo(in.UserId)
 	if err != nil {
 		return nil, err
 	}
 	switch in.CountType {
 	case "follow":
-		user.Follow += in.Op
+		user.FollowCount += in.Op
 	case "follower":
-		user.Follower += in.Op
+		user.FollowerCount += in.Op
 	case "liked":
-		user.TotalFav += in.Op
+		user.TotalFavorited += in.Op
 	case "like":
-		user.FavCount += in.Op
+		user.FavoriteCount += in.Op
 	}
 	repository.CacheSetUserInfo(user)
 	return &pb.CacheChangeUserCountRsp{}, nil
@@ -88,7 +86,7 @@ func (u *UserService) Register(ctx context.Context, in *pb.RegisterRequest) (*pb
 		return nil, err
 	}
 	var token string
-	token, err = repository.GenerateToken(user.Id, user.Name)
+	token, err = repository.GenerateToken(user.Id, user.UserName)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +108,7 @@ func (u *UserService) CheckPassWord(ctx context.Context, in *pb.CheckPassWordReq
 		return nil, errors.New("password error")
 	}
 	//生成token
-	token, err := repository.GenerateToken(user.Id, user.Name)
+	token, err := repository.GenerateToken(user.Id, user.UserName)
 	if err != nil {
 		return nil, err
 	}
@@ -140,14 +138,14 @@ func (u *UserService) GetUserInfoDict(ctx context.Context, in *pb.GetUserInfoDic
 	for _, user := range users {
 		tmp[user.Id] = &pb.UserInfo{
 			Id:              user.Id,
-			Name:            user.Name,
-			FollowCount:     user.Follow,
-			FollowerCount:   user.Follower,
+			Name:            user.UserName,
+			FollowCount:     user.FollowCount,
+			FollowerCount:   user.FollowerCount,
 			Avatar:          user.Avatar,
 			BackgroundImage: user.BackgroundImage,
 			Signature:       user.Signature,
-			TotalFavorited:  user.TotalFav,
-			FavoriteCount:   user.FavCount,
+			TotalFavorited:  user.TotalFavorited,
+			FavoriteCount:   user.FavoriteCount,
 		}
 	}
 	resp := &pb.GetUserInfoDictResponse{UserInfoDict: tmp}
@@ -157,14 +155,14 @@ func (u *UserService) GetUserInfoDict(ctx context.Context, in *pb.GetUserInfoDic
 func UserToUserInfo(info repository.User) *pb.UserInfo {
 	return &pb.UserInfo{
 		Id:              info.Id,
-		Name:            info.Name,
-		FollowCount:     info.Follow,
-		FollowerCount:   info.Follower,
+		Name:            info.UserName,
+		FollowCount:     info.FollowCount,
+		FollowerCount:   info.FollowerCount,
 		IsFollow:        false,
 		Avatar:          info.Avatar,
 		BackgroundImage: info.BackgroundImage,
 		Signature:       info.Signature,
-		TotalFavorited:  info.TotalFav,
-		FavoriteCount:   info.FavCount,
+		TotalFavorited:  info.TotalFavorited,
+		FavoriteCount:   info.FavoriteCount,
 	}
 }

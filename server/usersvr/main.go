@@ -16,7 +16,6 @@ import (
 	"usersvr/middlerware/cache"
 	"usersvr/middlerware/consul"
 	"usersvr/middlerware/db"
-	"usersvr/middlerware/lock"
 	"usersvr/service"
 )
 
@@ -83,7 +82,7 @@ func main() {
 	defer db.CloseDb()
 	defer cache.CloseRedis()
 	defer log.Sync()
-	defer lock.CloseRedSync()
+	//defer lock.CloseRedSync()
 	if err := Run(); err != nil {
 		log.Errorf("UserSvr run err:%v", err)
 	}

@@ -13,7 +13,8 @@ import (
 //返回db对象
 
 var (
-	db     *gorm.DB
+	db *gorm.DB
+
 	dbOnce sync.Once
 )
 
@@ -40,7 +41,7 @@ func GetDb() *gorm.DB {
 	return db
 }
 
-func CloseDb() {
+func CloseDB() {
 	if db != nil {
 		sqlDB, err := db.DB()
 		if err != nil {

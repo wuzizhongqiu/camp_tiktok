@@ -15,6 +15,7 @@ CERATE TABLE `t_comment`
     `video_id` bigint(20) NOT NULL COMMENT '评论视频id',
     `parent_id` bigint(20)  COMMENT '父评论的id',
     `parent_user_id` bigint(20)  COMMENT '父评论的user_id',
+    `delete`  tinyint(4) NOT NULL COMMENT '0不删除，1删除',
     `comment_level` tinyint(4) NOT NULL COMMENT '评论的等级，1为一级评论，2为二级评论',
     `comment_text` varchar(255) NOT NULL COMMENT '评论内容',
     `create_time` datatime  NOT NULL COMMENT '评论发布时间',

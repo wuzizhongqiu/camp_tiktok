@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"github.com/go-redis/redis"
 	"golang.org/x/net/context"
 	"strconv"
 	"usersvr/log"
@@ -9,18 +8,18 @@ import (
 )
 
 // CacheCheckUser 检查key是否失效
-func CacheCheckUser(uid int64) (error, bool) {
+func CacheCheckUser(uid int64) (bool, error) {
 	rdb := cache.GetRdb()
 	userKey := userKeyPrefix + strconv.FormatInt(uid, 10)
-	_, err := rdb.HGetAll(context.Background(), userKey).Result()
+	data, err := rdb.HGetAll(context.Background(), userKey).Result()
 	if err != nil {
-		if err == redis.Nil {
-			return nil, false
-		}
-		log.Errorf("CacheCheckUser err==%v", err)
-		return err, false
+		log.Errorf("CacheCheckUser err: %v", err)
+		return false, err
 	}
-	return nil, true
+	if len(data) == 0 {
+		return false, nil
+	}
+	return true, nil
 }
 
 func CacheUpdateFollowerNum(uid int64, num int64) error {
@@ -81,34 +80,37 @@ func CacheGetUserInfo(uid int64) (User, error) {
 		return user, err
 	}
 	user.Id, _ = strconv.ParseInt(data["id"], 10, 64)
-	user.Name = data["user_name"]
+	user.UserName = data["user_name"]
 	user.Password = data["password"]
-	user.Follow, _ = strconv.ParseInt(data["follow_count"], 10, 64)
-	user.Follower, _ = strconv.ParseInt(data["follower_count"], 10, 64)
+	user.FollowCount, _ = strconv.ParseInt(data["follow_count"], 10, 64)
+	user.FollowerCount, _ = strconv.ParseInt(data["follower_count"], 10, 64)
 	user.Avatar = data["avatar"]
 	user.BackgroundImage = data["background_image"]
 	user.Signature = data["signature"]
-	user.TotalFav, _ = strconv.ParseInt(data["total_favorited"], 10, 64)
-	user.FavCount, _ = strconv.ParseInt(data["favorite_count"], 10, 64)
+	user.TotalFavorited, _ = strconv.ParseInt(data["total_favorited"], 10, 64)
+	user.FavoriteCount, _ = strconv.ParseInt(data["favorite_count"], 10, 64)
 	return user, nil
 }
 
 func CacheSetUserInfo(u User) {
 	rdb := cache.GetRdb()
 	userKey := userKeyPrefix + strconv.FormatInt(u.Id, 10)
-	if err := rdb.HSet(context.Background(), userKey, map[string]interface{}{
+	log.Infof("userKey =%s", userKey)
+	log.Infof("%+v", u)
+	if err := rdb.HMSet(context.Background(), userKey, map[string]interface{}{
 		"id":               u.Id,
-		"user_name":        u.Name,
+		"user_name":        u.UserName,
 		"password":         u.Password,
-		"follow_count":     u.Follow,
-		"follower_count":   u.Follower,
+		"follow_count":     u.FollowCount,
+		"follower_count":   u.FollowerCount,
 		"avatar":           u.Avatar,
 		"background_image": u.BackgroundImage,
 		"signature":        u.Signature,
-		"total_favorited":  u.TotalFav,
-		"favorite_count":   u.FavCount,
+		"total_favorited":  u.TotalFavorited,
+		"favorite_count":   u.FavoriteCount,
 	}).Err(); err != nil {
 		log.Errorf("CacheSetUserInfo err===%v", err)
+		log.Infof("userKey =%s", userKey)
 		return
 	}
 }
