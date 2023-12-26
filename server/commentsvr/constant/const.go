@@ -35,3 +35,8 @@ const (
 	DefaultTime  = "2006-01-02 15:04:05"
 	DefaultLimit = 15
 )
+
+const (
+	ExistInRedis    = 1
+	NotExistInRedis = 0
+)

@@ -7,6 +7,8 @@ type CommentOther struct {
 	CommentReplies []CommentReply
 }
 
+var videoKeyPrefix = "tiktok:video:"
+
 type Comment struct {
 	Id           int64     //评论id,自增主键
 	UserId       int64     //评论发布用户id

@@ -8,6 +8,17 @@ import (
 	"time"
 )
 
+func GetCommentIdsByVideoId(videoId int64) ([]int64, error) {
+	Db := db.GetDb()
+	var ids []int64
+	err := Db.Model(&Comment{}).Where("video_id=?", videoId).Pluck("id", &ids).Error
+	if err != nil {
+		log.Errorf("GetCommentIdsByVideoId err==%v", err)
+		return nil, err
+	}
+	return ids, nil
+}
+
 func GetCommentSumByDB(videoId int64) (int64, error) {
 	Db := db.GetDb()
 	var count int64

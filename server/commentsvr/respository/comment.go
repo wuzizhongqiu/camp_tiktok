@@ -1,6 +1,9 @@
 package respository
 
-import "commentsvr/log"
+import (
+	"commentsvr/log"
+	"strconv"
+)
 
 // ReplyComment 回复评论的详细内容,在获取到所有二级评论后对其中的回复评论进行封装
 type ReplyComment struct {
@@ -10,12 +13,36 @@ type ReplyComment struct {
 }
 
 func GetCommentSum(vid int64) (int64, error) {
-	//todo:利用缓存
-	sum, err := GetCommentSumByDB(vid)
+	sVid := strconv.FormatInt(vid, 10)
+	err, flag := Exist(sVid)
 	if err != nil {
 		return 0, err
 	}
-	return sum, nil
+	//如果不存在，则从数据库更新
+	if !flag {
+		ids, err := GetCommentIdsByVideoId(vid)
+		if err != nil {
+			return 0, err
+		}
+		for _, id := range ids {
+			err := VideoCommentNumAddByCache(sVid, strconv.FormatInt(id, 10))
+			if err != nil {
+				err = DelFormCache(sVid)
+				return 0, err
+			}
+		}
+		sum, err := GetCommentSumByDB(vid)
+		if err != nil {
+			return 0, err
+		}
+		return sum, nil
+	} else {
+		sum, err := CacheGetCommentNum(sVid)
+		if err != nil {
+			return 0, err
+		}
+		return sum, nil
+	}
 }
 
 func GetOtherCommentList(vid, parentId int64, page, size int) ([]*Comment, []*ReplyComment, error) {
@@ -78,15 +105,63 @@ func CreateTopComment(uid, vid int64, text string) (*Comment, error) {
 	if err != nil {
 		return nil, err
 	}
-	//todo:完成cache功能
+	sVid := strconv.FormatInt(vid, 10)
+	err, flag := Exist(sVid)
+	if err != nil {
+		return nil, err
+	}
+	//如果不存在，则从数据库更新
+	if !flag {
+		ids, err := GetCommentIdsByVideoId(vid)
+		if err != nil {
+			return nil, err
+		}
+		for _, id := range ids {
+			err := VideoCommentNumAddByCache(sVid, strconv.FormatInt(id, 10))
+			if err != nil {
+				err = DelFormCache(sVid)
+				return nil, err
+			}
+		}
+	} else {
+		err = VideoCommentNumAddByCache(sVid, strconv.FormatInt(comment.Id, 10))
+		if err != nil {
+			err = DelFormCache(sVid)
+			return nil, err
+		}
+	}
 	return comment, nil
 }
 
 func DeleteTopComment(vid, commentId int64) error {
-	//todo:完成cache功能
 	err := DeleteTopCommentByDB(commentId)
 	if err != nil {
 		return err
+	}
+	sVid := strconv.FormatInt(vid, 10)
+	err, flag := Exist(sVid)
+	if err != nil {
+		return err
+	}
+	//如果不存在，则从数据库更新,然后删除
+	if !flag {
+		ids, err := GetCommentIdsByVideoId(vid)
+		if err != nil {
+			return err
+		}
+		for _, id := range ids {
+			err := VideoCommentNumAddByCache(sVid, strconv.FormatInt(id, 10))
+			if err != nil {
+				err = DelFormCache(sVid)
+				return err
+			}
+		}
+	} else {
+		err = DelMemberFromCache(sVid, strconv.FormatInt(commentId, 10))
+		if err != nil {
+			err = DelFormCache(sVid)
+			return err
+		}
 	}
 	return nil
 }
@@ -97,7 +172,31 @@ func CreateOtherComment(vid, uid, parentId, replyId, parentUid int64, text strin
 	if err != nil {
 		return nil, err
 	}
-	//todo:用cache存储
+	sVid := strconv.FormatInt(vid, 10)
+	err, flag := Exist(sVid)
+	if err != nil {
+		return nil, err
+	}
+	//如果不存在，则从数据库更新
+	if !flag {
+		ids, err := GetCommentIdsByVideoId(vid)
+		if err != nil {
+			return nil, err
+		}
+		for _, id := range ids {
+			err := VideoCommentNumAddByCache(sVid, strconv.FormatInt(id, 10))
+			if err != nil {
+				err = DelFormCache(sVid)
+				return nil, err
+			}
+		}
+	} else {
+		err = VideoCommentNumAddByCache(sVid, strconv.FormatInt(comment.Id, 10))
+		if err != nil {
+			err = DelFormCache(sVid)
+			return nil, err
+		}
+	}
 	return comment, nil
 }
 
@@ -105,6 +204,31 @@ func DeleteOtherComment(vid, commentId int64) error {
 	err := DeleteOtherCommentByDB(commentId)
 	if err != nil {
 		return err
+	}
+	sVid := strconv.FormatInt(vid, 10)
+	err, flag := Exist(sVid)
+	if err != nil {
+		return err
+	}
+	//如果不存在，则从数据库更新
+	if !flag {
+		ids, err := GetCommentIdsByVideoId(vid)
+		if err != nil {
+			return err
+		}
+		for _, id := range ids {
+			err := VideoCommentNumAddByCache(sVid, strconv.FormatInt(id, 10))
+			if err != nil {
+				err = DelFormCache(sVid)
+				return err
+			}
+		}
+	} else {
+		err = DelMemberFromCache(sVid, strconv.FormatInt(commentId, 10))
+		if err != nil {
+			err = DelFormCache(sVid)
+			return err
+		}
 	}
 	return nil
 }
