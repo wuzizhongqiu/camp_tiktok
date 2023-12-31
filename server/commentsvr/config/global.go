@@ -18,10 +18,9 @@ type GlobalConfig struct {
 }
 
 type SvrConfig struct {
-	Name        string `mapstructure:"name"`
-	Host        string `mapstructure:"host"`
-	Port        int    `mapstructuer:"port"`
-	UserSvrName string `mapstructure:"user_svr_name"` // 用户服务name
+	Name string `mapstructure:"name"`
+	Host string `mapstructure:"host"`
+	Port int    `mapstructuer:"port"`
 }
 
 type RedisConfig struct {

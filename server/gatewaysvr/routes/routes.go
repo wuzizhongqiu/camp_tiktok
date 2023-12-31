@@ -18,7 +18,7 @@ func SetRoute() *gin.Engine {
 		UserRoutes(douyin)
 		//PublishRoutes(douyin)
 		CommentRoutes(douyin)
-		//FavoriteRoutes(douyin)
+		FavoriteRoutes(douyin)
 		//RelationRoutes(douyin)
 		//douyin.GET("/feed/", common.AuthWithOutMiddleware(), controller.Feed)
 	}

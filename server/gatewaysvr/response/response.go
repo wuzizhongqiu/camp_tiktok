@@ -29,6 +29,7 @@ func Success(ctx *gin.Context, msg string, v interface{}) {
 	}
 }
 
+// Fail 这里如果不会直接传错误回去的，只是为了方便调试
 func Fail(ctx *gin.Context, msg string, v interface{}) {
 	if v == nil {
 		Response(ctx, 200, response{errorCode, msg})

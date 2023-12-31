@@ -95,7 +95,7 @@ func GetVideoLikeList(vid int64) ([]int64, error) {
 func GetUserLikeList(uid int64) ([]int64, error) {
 	DB := db.GetDb()
 	var ids []int64
-	err := DB.Model(&VideoLike{}).Where(&VideoLike{UserId: uid, Delete: constant.NotDelete}).Pluck("video_idd", &ids).Error
+	err := DB.Model(&VideoLike{}).Where(&VideoLike{UserId: uid, Delete: constant.NotDelete}).Pluck("video_id", &ids).Error
 	if err != nil {
 		log.Errorf(" GetUserLikeList err==%v ", err)
 		return nil, err

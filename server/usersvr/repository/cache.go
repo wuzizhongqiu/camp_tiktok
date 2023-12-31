@@ -3,9 +3,20 @@ package repository
 import (
 	"golang.org/x/net/context"
 	"strconv"
+	"usersvr/constant"
 	"usersvr/log"
 	"usersvr/middlerware/cache"
 )
+
+func setExpire(key string) error {
+	rdb := cache.GetRdb()
+	_, err := rdb.Expire(context.Background(), key, constant.KeyExpire).Result()
+	if err != nil {
+		log.Infof("setExpire %s err==%v", key, err)
+		return err
+	}
+	return nil
+}
 
 // CacheCheckUser 检查key是否失效
 func CacheCheckUser(uid int64) (bool, error) {
@@ -25,7 +36,11 @@ func CacheCheckUser(uid int64) (bool, error) {
 func CacheUpdateFollowerNum(uid int64, num int64) error {
 	rdb := cache.GetRdb()
 	userKey := userKeyPrefix + strconv.FormatInt(uid, 10)
-	err := rdb.HIncrBy(context.Background(), userKey, "follower_count", num).Err()
+	err := setExpire(userKey)
+	if err != nil {
+		return err
+	}
+	err = rdb.HIncrBy(context.Background(), userKey, "follower_count", num).Err()
 	if err != nil {
 		log.Errorf("CacheUpdateFollowerNum err====%v ", err)
 		return err
@@ -36,7 +51,11 @@ func CacheUpdateFollowerNum(uid int64, num int64) error {
 func CacheUpdateFollowNum(uid int64, num int64) error {
 	rdb := cache.GetRdb()
 	userKey := userKeyPrefix + strconv.FormatInt(uid, 10)
-	err := rdb.HIncrBy(context.Background(), userKey, "follow_count", num).Err()
+	err := setExpire(userKey)
+	if err != nil {
+		return err
+	}
+	err = rdb.HIncrBy(context.Background(), userKey, "follow_count", num).Err()
 	if err != nil {
 		log.Errorf("CacheUpdateFollowNum err====%v ", err)
 		return err
@@ -47,7 +66,11 @@ func CacheUpdateFollowNum(uid int64, num int64) error {
 func CacheUpdateFavoriteNum(uid int64, num int64) error {
 	rdb := cache.GetRdb()
 	userKey := userKeyPrefix + strconv.FormatInt(uid, 10)
-	err := rdb.HIncrBy(context.Background(), userKey, "favorite_count", num).Err()
+	err := setExpire(userKey)
+	if err != nil {
+		return err
+	}
+	err = rdb.HIncrBy(context.Background(), userKey, "favorite_count", num).Err()
 	if err != nil {
 		log.Errorf("CacheUpdateFavoriteNum err====%v ", err)
 		return err
@@ -58,7 +81,11 @@ func CacheUpdateFavoriteNum(uid int64, num int64) error {
 func CacheUpdateFavoritedNum(uid int64, num int64) error {
 	rdb := cache.GetRdb()
 	userKey := userKeyPrefix + strconv.FormatInt(uid, 10)
-	err := rdb.HIncrBy(context.Background(), userKey, "total_favorited", num).Err()
+	err := setExpire(userKey)
+	if err != nil {
+		return err
+	}
+	err = rdb.HIncrBy(context.Background(), userKey, "total_favorited", num).Err()
 	if err != nil {
 		log.Errorf("CacheUpdateFavoritedNum err====%v ", err)
 		return err
@@ -69,7 +96,12 @@ func CacheUpdateFavoritedNum(uid int64, num int64) error {
 func CacheGetUserInfo(uid int64) (User, error) {
 	rdb := cache.GetRdb()
 	userKey := userKeyPrefix + strconv.FormatInt(uid, 10)
+
 	var user User
+	err := setExpire(userKey)
+	if err != nil {
+		return user, err
+	}
 	data, err := rdb.HGetAll(context.Background(), userKey).Result()
 	if err != nil {
 		log.Errorf("cache GetUserInfo err:%v", err)
@@ -95,6 +127,8 @@ func CacheGetUserInfo(uid int64) (User, error) {
 func CacheSetUserInfo(u User) {
 	rdb := cache.GetRdb()
 	userKey := userKeyPrefix + strconv.FormatInt(u.Id, 10)
+	setExpire(userKey)
+
 	log.Infof("userKey =%s", userKey)
 	log.Infof("%+v", u)
 	if err := rdb.HMSet(context.Background(), userKey, map[string]interface{}{

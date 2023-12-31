@@ -8,6 +8,16 @@ import (
 	"strconv"
 )
 
+func setExpire(key string) error {
+	rdb := cache.GetRdb()
+	_, err := rdb.Expire(context.Background(), key, constant.KeyExpire).Result()
+	if err != nil {
+		log.Infof("setExpire %s err==%v", key, err)
+		return err
+	}
+	return nil
+}
+
 func Exist(key string) (error, bool) {
 	keyVideo := key + videoKeyPrefix
 	rdb := cache.GetRdb()
@@ -26,7 +36,11 @@ func Exist(key string) (error, bool) {
 func VideoLikeNumAddByCache(vid string, uid string) error {
 	DB := cache.GetRdb()
 	VideoKey := videoKeyPrefix + vid
-	_, err := DB.SAdd(context.Background(), VideoKey, uid).Result()
+	err := setExpire(VideoKey)
+	if err != nil {
+		return err
+	}
+	_, err = DB.SAdd(context.Background(), VideoKey, uid).Result()
 	if err != nil {
 		log.Errorf("VideoCommentNumAddByCache err==%v", err)
 		return err
@@ -49,6 +63,10 @@ func DelFromCache(vid string) error {
 func CacheGetVideoLikeNum(vid string) (int64, error) {
 	DB := cache.GetRdb()
 	VideoKey := videoKeyPrefix + vid
+	err := setExpire(VideoKey)
+	if err != nil {
+		return 0, err
+	}
 	num, err := DB.SCard(context.Background(), VideoKey).Result()
 	if err != nil {
 		log.Errorf("CacheGetCommentNum err=%v", err)
@@ -60,7 +78,11 @@ func CacheGetVideoLikeNum(vid string) (int64, error) {
 func DelMemberFromCache(vid string, uid string) error {
 	DB := cache.GetRdb()
 	VideoKey := videoKeyPrefix + vid
-	_, err := DB.SRem(context.Background(), VideoKey, uid).Result()
+	err := setExpire(VideoKey)
+	if err != nil {
+		return err
+	}
+	_, err = DB.SRem(context.Background(), VideoKey, uid).Result()
 	if err != nil {
 		log.Errorf("DelMemberFromCache err==%v", err)
 		return err
@@ -71,6 +93,10 @@ func DelMemberFromCache(vid string, uid string) error {
 func ExistUserKey(uid string) (error, bool) {
 	keyUser := uid + videoKeyPrefix
 	rdb := cache.GetRdb()
+	err := setExpire(keyUser)
+	if err != nil {
+		return err, false
+	}
 	flag, err := rdb.Exists(context.Background(), keyUser).Result()
 	if err != nil {
 		log.Error("Exist key==%s err=%v", uid, err)
@@ -85,7 +111,11 @@ func ExistUserKey(uid string) (error, bool) {
 func UserLikeAddByCache(vid string, uid string) error {
 	DB := cache.GetRdb()
 	userKey := userKeyPrefix + uid
-	_, err := DB.SAdd(context.Background(), userKey, vid).Result()
+	err := setExpire(userKey)
+	if err != nil {
+		return err
+	}
+	_, err = DB.SAdd(context.Background(), userKey, vid).Result()
 	if err != nil {
 		log.Errorf("VideoCommentNumAddByCache err==%v", err)
 		return err
@@ -96,7 +126,11 @@ func UserLikeAddByCache(vid string, uid string) error {
 func DelUserMemberFromCache(vid string, uid string) error {
 	DB := cache.GetRdb()
 	userKey := userKeyPrefix + uid
-	_, err := DB.SRem(context.Background(), userKey, vid).Result()
+	err := setExpire(userKey)
+	if err != nil {
+		return err
+	}
+	_, err = DB.SRem(context.Background(), userKey, vid).Result()
 	if err != nil {
 		log.Errorf("DelMemberFromCache err==%v", err)
 		return err
@@ -118,6 +152,10 @@ func DelUserFromCache(uid string) error {
 func GetUserLikeListFromCache(uid string) ([]int64, error) {
 	DB := cache.GetRdb()
 	userKey := userKeyPrefix + uid
+	err := setExpire(userKey)
+	if err != nil {
+		return nil, err
+	}
 	data, err := DB.SMembers(context.Background(), userKey).Result()
 	if err != nil {
 		log.Errorf(" GetUserLikeListFromCache %s err=%v", userKey, err)
@@ -134,6 +172,10 @@ func GetUserLikeListFromCache(uid string) ([]int64, error) {
 func IsUserLikeVideoCheckByCache(uid string, vid string) (bool, error) {
 	DB := cache.GetRdb()
 	userKey := userKeyPrefix + uid
+	err := setExpire(userKey)
+	if err != nil {
+		return false, err
+	}
 	flag, err := DB.SIsMember(context.Background(), userKey, vid).Result()
 	if err != nil {
 		return flag, err
@@ -157,7 +199,11 @@ func ExistCommentKey(cid string) (bool, error) {
 func CommentLikeNumAddByCache(cid string, uid string) error {
 	DB := cache.GetRdb()
 	commentKey := commentKeyPrefix + cid
-	_, err := DB.SAdd(context.Background(), commentKey, uid).Result()
+	err := setExpire(commentKey)
+	if err != nil {
+		return err
+	}
+	_, err = DB.SAdd(context.Background(), commentKey, uid).Result()
 	if err != nil {
 		log.Errorf(" CommentLikeNumAddByCache err==%v", err)
 		return err
@@ -179,6 +225,10 @@ func DelCommentFromCache(cid string) error {
 func CacheGetCommentLikeNum(cid string) (int64, error) {
 	DB := cache.GetRdb()
 	commentKey := commentKeyPrefix + cid
+	err := setExpire(commentKey)
+	if err != nil {
+		return 0, err
+	}
 	num, err := DB.SCard(context.Background(), commentKey).Result()
 	if err != nil {
 		log.Errorf("CacheGetCommentNum err=%v", err)
@@ -190,7 +240,11 @@ func CacheGetCommentLikeNum(cid string) (int64, error) {
 func DelCommentMemberFromCache(cid string, uid string) error {
 	DB := cache.GetRdb()
 	commentKey := commentKeyPrefix + cid
-	_, err := DB.SRem(context.Background(), commentKey, uid).Result()
+	err := setExpire(commentKey)
+	if err != nil {
+		return err
+	}
+	_, err = DB.SRem(context.Background(), commentKey, uid).Result()
 	if err != nil {
 		log.Errorf("DelCommentMemberFromCache err==%v", err)
 		return err
@@ -201,6 +255,10 @@ func DelCommentMemberFromCache(cid string, uid string) error {
 func IsUserLikeCommentCheckByCache(uid string, cid string) (bool, error) {
 	DB := cache.GetRdb()
 	commentKey := commentKeyPrefix + cid
+	err := setExpire(commentKey)
+	if err != nil {
+		return false, err
+	}
 	flag, err := DB.SIsMember(context.Background(), commentKey, uid).Result()
 	if err != nil {
 		return flag, err

@@ -3,6 +3,7 @@ package constant
 const (
 	SuccessCode = 0
 	ErrorCode   = 1
+	KeyExpire   = 60 * 5 //5分钟过期
 )
 
 const (

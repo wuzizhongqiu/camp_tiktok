@@ -20,7 +20,7 @@ var (
 	CommentSvrClient pb.CommentServiceClient
 	//VideoSvrClient    pb.VideoServiceClient
 	//RelationSvrClient pb.RelationServiceClient
-	//FavoriteSvrClient pb.FavoriteServiceClient
+	FavoriteSvrClient pb.FavoriteServiceClient
 )
 
 func NewSvrConn(svrName string) (*grpc.ClientConn, error) {
@@ -58,9 +58,9 @@ func GetCommentSvrClient() pb.CommentServiceClient {
 //	return RelationSvrClient
 //}
 
-//func GetFavoriteSvrClient() pb.FavoriteServiceClient {
-//	return FavoriteSvrClient
-//}
+func GetFavoriteSvrClient() pb.FavoriteServiceClient {
+	return FavoriteSvrClient
+}
 
 //func NewVideoSvrClient(svrName string) pb.VideoServiceClient {
 //	conn, err := NewSvrConn(svrName)
@@ -94,27 +94,28 @@ func NewCommentSvrClient(svrName string) pb.CommentServiceClient {
 //	return pb.NewRelationServiceClient(conn)
 //}
 //
-//func NewFavoriteSvrClient(svrName string) pb.FavoriteServiceClient {
-//	conn, err := NewSvrConn(svrName)
-//	if err != nil {
-//		return nil
-//	}
-//	return pb.NewFavoriteServiceClient(conn)
-//}
+
+func NewFavoriteSvrClient(svrName string) pb.FavoriteServiceClient {
+	conn, err := NewSvrConn(svrName)
+	if err != nil {
+		return nil
+	}
+	return pb.NewFavoriteServiceClient(conn)
+}
 
 func InitSvrConn() {
 	//VideoSvrClient = NewVideoSvrClient(config.GetGlobalConfig().SvrConfig.VideoSvrName)
 	UserSvrClient = NewUserSvrClient(config.GetGlobalConfig().SvrConfig.UserSvrName)
 	CommentSvrClient = NewCommentSvrClient(config.GetGlobalConfig().SvrConfig.CommentSvrName)
 	//RelationSvrClient = NewRelationSvrClient(config.GetGlobalConfig().SvrConfig.RelationSvrName)
-	//FavoriteSvrClient = NewFavoriteSvrClient(config.GetGlobalConfig().SvrConfig.FavoriteSvrName)
+	FavoriteSvrClient = NewFavoriteSvrClient(config.GetGlobalConfig().SvrConfig.FavoriteSvrName)
 }
 
 func GetCurrentTime() int64 {
 	return time.Now().UnixNano() / 1e6
 }
 
-// 随机生成字符
+// RandomString 随机生成字符
 func RandomString() string {
 	var letters = []byte("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM")
 	result := make([]byte, 16)
