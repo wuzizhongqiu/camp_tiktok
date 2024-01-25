@@ -14,6 +14,14 @@ type CommentService struct {
 	pb.UnimplementedCommentServiceServer
 }
 
+func (c *CommentService) CommentLikeAdd(ctx context.Context, in *pb.CommentAddLikeNumReq) (*pb.CommentAddLikeResp, error) {
+	err := respository.CommentLikeAdd(in.CommentId, in.Num)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.CommentAddLikeResp{}, nil
+}
+
 func (c *CommentService) GetCommentSum(ctx context.Context, in *pb.GetCommentNumReq) (*pb.GetCommentNumRsp, error) {
 	sum, err := respository.GetCommentSum(in.VideoId)
 	if err != nil {

@@ -3,7 +3,7 @@ module commentsvr
 go 1.19
 
 require (
-	github.com/Keqing-win/camp_tiktok v0.0.0-20231231062317-4eac196b3c79
+	github.com/Keqing-win/camp_tiktok v0.0.0-20240125021208-4ba4aa10a8fb
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/go-redsync/redsync/v4 v4.11.0
 	github.com/hashicorp/consul/api v1.26.1
@@ -12,8 +12,9 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/viper v1.18.2
 	go.uber.org/zap v1.26.0
-	golang.org/x/net v0.19.0
-	google.golang.org/grpc v1.60.1
+	golang.org/x/net v0.20.0
+	golang.org/x/sync v0.5.0
+	google.golang.org/grpc v1.61.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/driver/mysql v1.5.2
 	gorm.io/gorm v1.25.5
@@ -80,7 +81,7 @@ require (
 	github.com/golangci/misspell v0.4.0 // indirect
 	github.com/golangci/revgrep v0.0.0-20220804021717-745bb2f7c2e6 // indirect
 	github.com/golangci/unconvert v0.0.0-20180507085042-28b1c447d1f4 // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/gordonklaus/ineffassign v0.0.0-20230107090616-13ace0543b28 // indirect
 	github.com/gostaticanalysis/analysisutil v0.7.1 // indirect
 	github.com/gostaticanalysis/comment v1.4.2 // indirect
@@ -190,12 +191,11 @@ require (
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20230224173230-c95f2b4c22f2 // indirect
 	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/sync v0.5.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.13.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20231120223509-83a465c0220f // indirect
-	google.golang.org/protobuf v1.31.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240123012728-ef4313101c80 // indirect
+	google.golang.org/protobuf v1.32.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

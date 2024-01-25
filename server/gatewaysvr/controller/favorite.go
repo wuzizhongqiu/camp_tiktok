@@ -113,10 +113,22 @@ func FavoriteCommentAction(c *gin.Context) {
 		CommentId:  cid,
 		ActionType: actionType,
 	})
-
 	if err != nil {
 		response.Fail(c, err.Error(), nil)
 		return
 	}
+
+	var nums int64
+	if actionType == 1 {
+		nums = 1
+	} else {
+		nums = -1
+	}
+	_, err = utils.CommentSvrClient.CommentLikeAdd(c, &pb.CommentAddLikeNumReq{CommentId: cid, Num: nums})
+	if err != nil {
+		response.Fail(c, err.Error(), nil)
+		return
+	}
+
 	response.Success(c, "success", nil)
 }

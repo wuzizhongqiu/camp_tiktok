@@ -8,6 +8,16 @@ import (
 	"time"
 )
 
+func CommentLikeAddByDB(cid int64, num int64) error {
+	Db := db.GetDb()
+	err := Db.Model(&Comment{}).Where("id=?", cid).Update("favorite_num", gorm.Expr("favorite_num + ? ", num)).Error
+	if err != nil {
+		log.Errorf("CommentLikeAddByDB err==%v", err)
+		return err
+	}
+	return nil
+}
+
 func GetCommentIdsByVideoId(videoId int64) ([]int64, error) {
 	Db := db.GetDb()
 	var ids []int64

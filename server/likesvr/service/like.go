@@ -14,7 +14,7 @@ type LikeService struct {
 
 func (l *LikeService) GetCommentLikeSum(ctx context.Context, in *pb.CommentLikeSumReq) (*pb.CommentLikeSumRsq, error) {
 	//这里因为刚git提交完拉去不到最新的修改，应该是in，commentId
-	sum, err := respository.GetCommentLikeNum(in.VideoId)
+	sum, err := respository.GetCommentLikeNum(in.CommentId)
 	if err != nil {
 		return nil, err
 	}

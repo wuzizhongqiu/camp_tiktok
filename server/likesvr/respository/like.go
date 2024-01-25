@@ -1,9 +1,12 @@
 package respository
 
 import (
+	"golang.org/x/sync/singleflight"
 	"gorm.io/gorm"
 	"strconv"
 )
+
+var gsf singleflight.Group
 
 func GetCommentLikeNum(cid int64) (int64, error) {
 	flag, err := ExistCommentKey(strconv.FormatInt(cid, 10))
@@ -13,21 +16,24 @@ func GetCommentLikeNum(cid int64) (int64, error) {
 	var sum int64
 	//如果不存在，去数据库查
 	if !flag {
-		ids, err := GetUserIdListByDB(cid)
+		//采用单飞策略，防止缓存雪崩
+		v, err, _ := gsf.Do(strconv.FormatInt(cid, 10), func() (interface{}, error) {
+			return GetUserIdListByDB(cid)
+		})
 		if err != nil {
 			return 0, err
 		}
 		if err == gorm.ErrRecordNotFound {
 			return 0, nil
 		}
-		for _, uid := range ids {
+		for _, uid := range v.([]int64) {
 			err = CommentLikeNumAddByCache(strconv.FormatInt(cid, 10), strconv.FormatInt(uid, 10))
 			if err != nil {
 				err = DelCommentFromCache(strconv.FormatInt(cid, 10))
 				return 0, err
 			}
 		}
-		sum = int64(len(ids))
+		sum = int64(len(v.([]int64)))
 	} else {
 		sum, err = CacheGetCommentLikeNum(strconv.FormatInt(cid, 10))
 		if err != nil {
@@ -45,21 +51,23 @@ func IsFavoriteComment(uid, cid int64) (bool, error) {
 	}
 	//不存在更新缓存
 	if !flag {
-		ids, err := GetUserIdListByDB(cid)
+		v, err, _ := gsf.Do(strconv.FormatInt(cid, 10), func() (interface{}, error) {
+			return GetUserIdListByDB(cid)
+		})
 		if err == gorm.ErrRecordNotFound {
 			return false, nil
 		}
 		if err != nil {
 			return false, err
 		}
-		for _, id := range ids {
+		for _, id := range v.([]int64) {
 			err = CommentLikeNumAddByCache(strconv.FormatInt(cid, 10), strconv.FormatInt(id, 10))
 			if err != nil {
 				err = DelCommentFromCache(strconv.FormatInt(uid, 10))
 				return false, err
 			}
 		}
-		//查询数据库
+		//查询数据库,这里其实最好直接查询缓存，不要查db了，因为已经更新到缓存中了
 		exist, err := IsUserLikCommentCheckByDB(cid, uid)
 		if err != nil {
 			return false, err
@@ -245,21 +253,23 @@ func CacheGetVLikeNum(vid int64) (int64, error) {
 	var sum int64
 	//如果不存在，去数据库查
 	if !flag {
-		ids, err := GetVideoLikeList(vid)
+		v, err, _ := gsf.Do(strconv.FormatInt(vid, 10), func() (interface{}, error) {
+			return GetVideoLikeList(vid)
+		})
 		if err != nil {
 			return 0, err
 		}
 		if err == gorm.ErrRecordNotFound {
 			return 0, nil
 		}
-		for _, uid := range ids {
+		for _, uid := range v.([]int64) {
 			err = VideoLikeNumAddByCache(strconv.FormatInt(vid, 10), strconv.FormatInt(uid, 10))
 			if err != nil {
 				err = DelFromCache(strconv.FormatInt(vid, 10))
 				return 0, err
 			}
 		}
-		sum = int64(len(ids))
+		sum = int64(len(v.([]int64)))
 	} else {
 		sum, err = CacheGetVideoLikeNum(strconv.FormatInt(vid, 10))
 		if err != nil {

@@ -2,6 +2,7 @@ package respository
 
 import (
 	"commentsvr/log"
+	"golang.org/x/sync/singleflight"
 	"strconv"
 )
 
@@ -12,6 +13,13 @@ type ReplyComment struct {
 	ReplyUserId int64
 }
 
+var gsf singleflight.Group
+
+func CommentLikeAdd(cid int64, num int64) error {
+	err := CommentLikeAddByDB(cid, num)
+	return err
+}
+
 func GetCommentSum(vid int64) (int64, error) {
 	sVid := strconv.FormatInt(vid, 10)
 	err, flag := Exist(sVid)
@@ -20,18 +28,21 @@ func GetCommentSum(vid int64) (int64, error) {
 	}
 	//如果不存在，则从数据库更新
 	if !flag {
-		ids, err := GetCommentIdsByVideoId(vid)
+		ids, err, _ := gsf.Do(strconv.FormatInt(vid, 10), func() (interface{}, error) {
+			return GetCommentIdsByVideoId(vid)
+		})
 		if err != nil {
 			return 0, err
 		}
-		for _, id := range ids {
+		for _, id := range ids.([]int64) {
 			err := VideoCommentNumAddByCache(sVid, strconv.FormatInt(id, 10))
 			if err != nil {
 				err = DelFormCache(sVid)
 				return 0, err
 			}
 		}
-		sum, err := GetCommentSumByDB(vid)
+		//更新后，从cache拿数据
+		sum, err := CacheGetCommentNum(sVid)
 		if err != nil {
 			return 0, err
 		}
