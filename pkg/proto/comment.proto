@@ -98,6 +98,7 @@ message GetCommentNumRsp{
 }
 
 service CommentService{
+  rpc CommentLikeAdd(CommentAddLikeNumReq) returns (CommentAddLikeResp);//给评论点赞或取消点赞
   rpc CommentTopAction(CommentActionTopReq) returns (CommentActionRsp);//发布一级评论
   rpc CommentOtherAction(CommentActionOtherReq) returns (CommentActionRsp);//发布多级评论
   rpc GetTopCommentList(GetTopCommentListReq) returns (GetTopCommentListRsp);//获取一级评论列表

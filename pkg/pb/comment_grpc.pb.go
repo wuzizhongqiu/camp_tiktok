@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CommentServiceClient interface {
+	CommentLikeAdd(ctx context.Context, in *CommentAddLikeNumReq, opts ...grpc.CallOption) (*CommentAddLikeResp, error)
 	CommentTopAction(ctx context.Context, in *CommentActionTopReq, opts ...grpc.CallOption) (*CommentActionRsp, error)
 	CommentOtherAction(ctx context.Context, in *CommentActionOtherReq, opts ...grpc.CallOption) (*CommentActionRsp, error)
 	GetTopCommentList(ctx context.Context, in *GetTopCommentListReq, opts ...grpc.CallOption) (*GetTopCommentListRsp, error)
@@ -35,6 +36,15 @@ type commentServiceClient struct {
 
 func NewCommentServiceClient(cc grpc.ClientConnInterface) CommentServiceClient {
 	return &commentServiceClient{cc}
+}
+
+func (c *commentServiceClient) CommentLikeAdd(ctx context.Context, in *CommentAddLikeNumReq, opts ...grpc.CallOption) (*CommentAddLikeResp, error) {
+	out := new(CommentAddLikeResp)
+	err := c.cc.Invoke(ctx, "/CommentService/CommentLikeAdd", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *commentServiceClient) CommentTopAction(ctx context.Context, in *CommentActionTopReq, opts ...grpc.CallOption) (*CommentActionRsp, error) {
@@ -86,6 +96,7 @@ func (c *commentServiceClient) GetCommentSum(ctx context.Context, in *GetComment
 // All implementations must embed UnimplementedCommentServiceServer
 // for forward compatibility
 type CommentServiceServer interface {
+	CommentLikeAdd(context.Context, *CommentAddLikeNumReq) (*CommentAddLikeResp, error)
 	CommentTopAction(context.Context, *CommentActionTopReq) (*CommentActionRsp, error)
 	CommentOtherAction(context.Context, *CommentActionOtherReq) (*CommentActionRsp, error)
 	GetTopCommentList(context.Context, *GetTopCommentListReq) (*GetTopCommentListRsp, error)
@@ -98,6 +109,9 @@ type CommentServiceServer interface {
 type UnimplementedCommentServiceServer struct {
 }
 
+func (UnimplementedCommentServiceServer) CommentLikeAdd(context.Context, *CommentAddLikeNumReq) (*CommentAddLikeResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CommentLikeAdd not implemented")
+}
 func (UnimplementedCommentServiceServer) CommentTopAction(context.Context, *CommentActionTopReq) (*CommentActionRsp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CommentTopAction not implemented")
 }
@@ -124,6 +138,24 @@ type UnsafeCommentServiceServer interface {
 
 func RegisterCommentServiceServer(s grpc.ServiceRegistrar, srv CommentServiceServer) {
 	s.RegisterService(&CommentService_ServiceDesc, srv)
+}
+
+func _CommentService_CommentLikeAdd_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommentAddLikeNumReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommentServiceServer).CommentLikeAdd(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/CommentService/CommentLikeAdd",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommentServiceServer).CommentLikeAdd(ctx, req.(*CommentAddLikeNumReq))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _CommentService_CommentTopAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -223,6 +255,10 @@ var CommentService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "CommentService",
 	HandlerType: (*CommentServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CommentLikeAdd",
+			Handler:    _CommentService_CommentLikeAdd_Handler,
+		},
 		{
 			MethodName: "CommentTopAction",
 			Handler:    _CommentService_CommentTopAction_Handler,
