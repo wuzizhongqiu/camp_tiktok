@@ -31,17 +31,35 @@ func DeleteCommentLike(cid, uid int64) error {
 }
 
 func InsertCommentLike(cid, uid int64) error {
-	var comment CommentLike
-	comment.CommentId = cid
-	comment.UserId = uid
-	comment.Delete = constant.NotDelete
 	DB := db.GetDb()
-	err := DB.Create(&comment).Error
-	if err != nil {
-		log.Errorf("InsertCommentLike insert err==%v", err)
+	err := DB.Transaction(func(tx *gorm.DB) error {
+		//先查询有无关注关系
+		var comment CommentLike
+		err := tx.Where(&CommentLike{UserId: uid, CommentId: cid, Delete: constant.Delete}).First(&comment).Error
+		if err != nil {
+			if err == gorm.ErrRecordNotFound {
+				//不存在就进行插入操作
+				comment.CommentId = cid
+				comment.UserId = uid
+				comment.Delete = constant.NotDelete
+				err = tx.Create(&comment).Error
+				if err != nil {
+					log.Errorf("InsertCommentLike err===%v", err)
+					return err
+				}
+				return nil
+			}
+			log.Errorf("InsertCommentLike err===%v", err)
+			return err
+		}
+		//有就进行更新操作
+		err = tx.Where(&CommentLike{UserId: uid, CommentId: cid, Delete: constant.Delete}).Update("delete", constant.NotDelete).Error
+		if err != nil {
+			log.Errorf("InsertCommentLike err===%v", err)
+		}
 		return err
-	}
-	return nil
+	})
+	return err
 }
 
 func GetUserIdListByDB(cid int64) ([]int64, error) {
@@ -55,17 +73,35 @@ func GetUserIdListByDB(cid int64) ([]int64, error) {
 }
 
 func InsertVideoLike(vid, uid int64) error {
-	var like VideoLike
-	like.VideoId = vid
-	like.UserId = uid
-	like.Delete = constant.NotDelete
 	DB := db.GetDb()
-	err := DB.Create(&like).Error
-	if err != nil {
-		log.Errorf("VideoLikeAction insert err==%v", err)
+	err := DB.Transaction(func(tx *gorm.DB) error {
+		//先查询有无关注关系
+		var like VideoLike
+		err := tx.Where(&VideoLike{UserId: uid, VideoId: vid, Delete: constant.Delete}).First(&like).Error
+		if err != nil {
+			if err == gorm.ErrRecordNotFound {
+				//不存在就进行插入操作
+				like.VideoId = vid
+				like.UserId = uid
+				like.Delete = constant.NotDelete
+				err = tx.Create(&like).Error
+				if err != nil {
+					log.Errorf("InsertVideoLike err===%v", err)
+					return err
+				}
+				return nil
+			}
+			log.Errorf("InsertVideoLike err===%v", err)
+			return err
+		}
+		//有就进行更新操作
+		err = tx.Where(&VideoLike{UserId: uid, VideoId: vid, Delete: constant.Delete}).Update("delete", constant.NotDelete).Error
+		if err != nil {
+			log.Errorf("InsertVideoLike err===%v", err)
+		}
 		return err
-	}
-	return nil
+	})
+	return err
 }
 
 func IsUserLikeVideoCheckByDB(vid, uid int64) (bool, error) {

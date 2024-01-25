@@ -39,7 +39,7 @@ func NewUserSvrClient(svrName string) pb.UserServiceClient {
 }
 
 func InitSvrConn() {
-	UserSvrClient = NewUserSvrClient(config.GetGlobalConfig().SvrConfig.UserSvrName)
+	UserSvrClient = NewUserSvrClient("usersvr")
 }
 
 func GetUserSvrClient() pb.UserServiceClient {

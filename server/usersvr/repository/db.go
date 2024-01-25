@@ -8,7 +8,7 @@ import (
 
 func UpdateFollowerNumByDB(uid int64, num int64) error {
 	Db := db.GetDb()
-	err := Db.Model(&User{}).Where("id = ?", uid).Exec("follower_count+?", num).Error
+	err := Db.Model(&User{}).Where("id = ?", uid).Update("follower_count", gorm.Expr("follower_count + ?", num)).Error
 	if err != nil {
 		log.Errorf("UpdateFollowerNumByDB err===%v", err)
 		return err
@@ -18,7 +18,7 @@ func UpdateFollowerNumByDB(uid int64, num int64) error {
 
 func UpdateFollowNumByDB(uid int64, num int64) error {
 	Db := db.GetDb()
-	err := Db.Model(&User{}).Where("id = ?", uid).Exec("follow_count+?", num).Error
+	err := Db.Model(&User{}).Where("id = ?", uid).Update("follow_count", gorm.Expr("follow_count + ?", num)).Error
 	if err != nil {
 		log.Errorf("UpdateFollowNumByDB err===%v", err)
 		return err
@@ -28,7 +28,7 @@ func UpdateFollowNumByDB(uid int64, num int64) error {
 
 func UpdateFavCountNumByDB(uid int64, num int64) error {
 	Db := db.GetDb()
-	err := Db.Model(&User{}).Where("id = ?", uid).Exec("favorite_count+?", num).Error
+	err := Db.Model(&User{}).Where("id = ?", uid).Update("favorite_count", gorm.Expr("favorite_count + ?", num)).Error
 	if err != nil {
 		log.Errorf("UpdateFavCountNumByDB err===%v", err)
 		return err
@@ -38,7 +38,7 @@ func UpdateFavCountNumByDB(uid int64, num int64) error {
 
 func UpdateTotalFav(uid int64, num int64) error {
 	Db := db.GetDb()
-	err := Db.Model(&User{}).Where("id = ?", uid).Exec("total_favorited+?", num).Error
+	err := Db.Model(&User{}).Where("id = ?", uid).Update("total_favorited", gorm.Expr("total_favorited + ?", num)).Error
 	if err != nil {
 		log.Errorf("UpdateTotalFav err===%v", err)
 		return err
@@ -80,6 +80,7 @@ func UserIsExist(username string) (bool, error) {
 }
 
 func GetUserInfoFromDB(uid int64) (User, error) {
+	log.Infof("GetUserInfoFromDB %d", uid)
 	Db := db.GetDb()
 	var user User
 	err := Db.Where("id=?", uid).First(&user).Error

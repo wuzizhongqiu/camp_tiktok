@@ -5,6 +5,7 @@ import (
 	"github.com/Keqing-win/camp_tiktok/pkg/pb"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
+	"usersvr/log"
 	"usersvr/repository"
 )
 
@@ -12,7 +13,21 @@ type UserService struct {
 	pb.UnimplementedUserServiceServer
 }
 
+func (u *UserService) GetUserInfoList(ctx context.Context, in *pb.GetUserInfoListRequest) (*pb.GetUserInfoListResponse, error) {
+	users, err := repository.GetUserInfoList(in.IdList)
+	if err != nil {
+		return nil, err
+	}
+	pbUsers := make([]*pb.UserInfo, 0)
+	for _, user := range users {
+		pbUser := UserToUserInfo(user)
+		pbUsers = append(pbUsers, pbUser)
+	}
+	return &pb.GetUserInfoListResponse{UserInfoList: pbUsers}, nil
+}
+
 func (u *UserService) UpdateUserFollowerCount(ctx context.Context, in *pb.UpdateUserFollowerCountReq) (*pb.UpdateUserFollowerCountRsp, error) {
+	log.Info("UpdateUserFollowerCount init")
 	err := repository.UpdateUserFollowerNum(in.UserId, in.ActionType)
 	if err != nil {
 		return nil, err
@@ -21,6 +36,7 @@ func (u *UserService) UpdateUserFollowerCount(ctx context.Context, in *pb.Update
 }
 
 func (u *UserService) UpdateUserFollowCount(ctx context.Context, in *pb.UpdateUserFollowCountReq) (*pb.UpdateUserFollowCountRsp, error) {
+	log.Info("UpdateUserFollowCount")
 	err := repository.UpdateUserFollowNum(in.UserId, in.ActionType)
 	if err != nil {
 		return nil, err

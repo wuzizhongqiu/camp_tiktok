@@ -16,10 +16,10 @@ import (
 )
 
 var (
-	UserSvrClient    pb.UserServiceClient
-	CommentSvrClient pb.CommentServiceClient
-	//VideoSvrClient    pb.VideoServiceClient
-	//RelationSvrClient pb.RelationServiceClient
+	UserSvrClient     pb.UserServiceClient
+	CommentSvrClient  pb.CommentServiceClient
+	VideoSvrClient    pb.VideoServiceClient
+	RelationSvrClient pb.RelationServiceClient
 	FavoriteSvrClient pb.FavoriteServiceClient
 )
 
@@ -54,21 +54,25 @@ func GetCommentSvrClient() pb.CommentServiceClient {
 	return CommentSvrClient
 }
 
-//func GetRelationSvrClient() pb.RelationServiceClient {
-//	return RelationSvrClient
-//}
+func GetRelationSvrClient() pb.RelationServiceClient {
+	return RelationSvrClient
+}
 
 func GetFavoriteSvrClient() pb.FavoriteServiceClient {
 	return FavoriteSvrClient
 }
 
-//func NewVideoSvrClient(svrName string) pb.VideoServiceClient {
-//	conn, err := NewSvrConn(svrName)
-//	if err != nil {
-//		return nil
-//	}
-//	return pb.NewVideoServiceClient(conn)
-//}
+func GetVideoSvrClient() pb.VideoServiceClient {
+	return VideoSvrClient
+}
+
+func NewVideoSvrClient(svrName string) pb.VideoServiceClient {
+	conn, err := NewSvrConn(svrName)
+	if err != nil {
+		return nil
+	}
+	return pb.NewVideoServiceClient(conn)
+}
 
 func NewUserSvrClient(svrName string) pb.UserServiceClient {
 	conn, err := NewSvrConn(svrName)
@@ -86,14 +90,13 @@ func NewCommentSvrClient(svrName string) pb.CommentServiceClient {
 	return pb.NewCommentServiceClient(conn)
 }
 
-//func NewRelationSvrClient(svrName string) pb.RelationServiceClient {
-//	conn, err := NewSvrConn(svrName)
-//	if err != nil {
-//		return nil
-//	}
-//	return pb.NewRelationServiceClient(conn)
-//}
-//
+func NewRelationSvrClient(svrName string) pb.RelationServiceClient {
+	conn, err := NewSvrConn(svrName)
+	if err != nil {
+		return nil
+	}
+	return pb.NewRelationServiceClient(conn)
+}
 
 func NewFavoriteSvrClient(svrName string) pb.FavoriteServiceClient {
 	conn, err := NewSvrConn(svrName)
@@ -104,10 +107,10 @@ func NewFavoriteSvrClient(svrName string) pb.FavoriteServiceClient {
 }
 
 func InitSvrConn() {
-	//VideoSvrClient = NewVideoSvrClient(config.GetGlobalConfig().SvrConfig.VideoSvrName)
+	VideoSvrClient = NewVideoSvrClient(config.GetGlobalConfig().SvrConfig.VideoSvrName)
 	UserSvrClient = NewUserSvrClient(config.GetGlobalConfig().SvrConfig.UserSvrName)
 	CommentSvrClient = NewCommentSvrClient(config.GetGlobalConfig().SvrConfig.CommentSvrName)
-	//RelationSvrClient = NewRelationSvrClient(config.GetGlobalConfig().SvrConfig.RelationSvrName)
+	RelationSvrClient = NewRelationSvrClient(config.GetGlobalConfig().SvrConfig.RelationSvrName)
 	FavoriteSvrClient = NewFavoriteSvrClient(config.GetGlobalConfig().SvrConfig.FavoriteSvrName)
 }
 

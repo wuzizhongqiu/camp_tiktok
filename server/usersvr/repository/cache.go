@@ -21,6 +21,7 @@ func setExpire(key string) error {
 // CacheCheckUser 检查key是否失效
 func CacheCheckUser(uid int64) (bool, error) {
 	rdb := cache.GetRdb()
+	log.Infof("CacheCheckUser %d", uid)
 	userKey := userKeyPrefix + strconv.FormatInt(uid, 10)
 	data, err := rdb.HGetAll(context.Background(), userKey).Result()
 	if err != nil {
@@ -34,6 +35,7 @@ func CacheCheckUser(uid int64) (bool, error) {
 }
 
 func CacheUpdateFollowerNum(uid int64, num int64) error {
+	log.Infof("CacheUpdateFollowerNum %d %d", uid, num)
 	rdb := cache.GetRdb()
 	userKey := userKeyPrefix + strconv.FormatInt(uid, 10)
 	err := setExpire(userKey)
@@ -124,14 +126,17 @@ func CacheGetUserInfo(uid int64) (User, error) {
 	return user, nil
 }
 
-func CacheSetUserInfo(u User) {
+func CacheSetUserInfo(u User) error {
+	log.Infof("CacheSetUserInfo %d", u.Id)
 	rdb := cache.GetRdb()
 	userKey := userKeyPrefix + strconv.FormatInt(u.Id, 10)
-	setExpire(userKey)
+	err := setExpire(userKey)
+	if err != nil {
+		log.Errorf("CacheSetUserInfo err==%v", err)
+		return err
+	}
 
-	log.Infof("userKey =%s", userKey)
-	log.Infof("%+v", u)
-	if err := rdb.HMSet(context.Background(), userKey, map[string]interface{}{
+	if err = rdb.HMSet(context.Background(), userKey, map[string]interface{}{
 		"id":               u.Id,
 		"user_name":        u.UserName,
 		"password":         u.Password,
@@ -145,6 +150,7 @@ func CacheSetUserInfo(u User) {
 	}).Err(); err != nil {
 		log.Errorf("CacheSetUserInfo err===%v", err)
 		log.Infof("userKey =%s", userKey)
-		return
+		return err
 	}
+	return nil
 }

@@ -7,6 +7,15 @@ option go_package = "../pb;pb";
 import "common.proto";
 import "user.proto";
 
+message CommentAddLikeNumReq{
+  int64 comment_id=1;
+  int64 num=2;
+}
+
+message  CommentAddLikeResp{
+  CommonResponse common_rsp = 1;
+}
+
 //发布一级评论的请求
 message CommentActionTopReq{
   int64 user_id=1;

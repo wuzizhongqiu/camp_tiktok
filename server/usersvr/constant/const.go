@@ -1,9 +1,11 @@
 package constant
 
+import "time"
+
 const (
 	SuccessCode = 0
 	ErrorCode   = 1
-	KeyExpire   = 60 * 5 //5分钟过期
+	KeyExpire   = 5 * time.Minute //5分钟过期
 )
 
 const (

@@ -26,6 +26,7 @@ func UpdateUserFollowerNum(uid int64, actionType int64) error {
 	}
 	//先更新数据库
 	var err error
+	log.Info("UpdateFollowerNumByDB init")
 	err = UpdateFollowerNumByDB(uid, num)
 	if err != nil {
 		return err
@@ -42,14 +43,15 @@ func UpdateUserFollowerNum(uid int64, actionType int64) error {
 		if err != nil {
 			return err
 		}
-		//异步去更新缓存
-		go CacheSetUserInfo(user)
-		return nil
-	}
-	//如果存在
-	err = CacheUpdateFollowerNum(uid, num)
-	if err != nil {
-		return err
+		err = CacheSetUserInfo(user)
+		if err != nil {
+			return err
+		}
+	} else {
+		err = CacheUpdateFollowerNum(uid, num)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -80,13 +82,16 @@ func UpdateUserFollowNum(uid int64, actionType int64) error {
 			return err
 		}
 		//异步去更新缓存
-		go CacheSetUserInfo(user)
-		return nil
-	}
-	//如果存在
-	err = CacheUpdateFollowNum(uid, num)
-	if err != nil {
-		return err
+		err = CacheSetUserInfo(user)
+		if err != nil {
+			return err
+		}
+	} else {
+		//如果存在
+		err = CacheUpdateFollowNum(uid, num)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -117,16 +122,18 @@ func UpdateUserFavoriteNum(uid int64, actionType int64) error {
 			return err
 		}
 		//异步去更新缓存
-		go CacheSetUserInfo(user)
-		return nil
-	}
-	//如果存在
-	err = CacheUpdateFavoriteNum(uid, num)
-	if err != nil {
-		return err
+		err = CacheSetUserInfo(user)
+		if err != nil {
+			return err
+		}
+	} else {
+		//如果存在
+		err = CacheUpdateFavoriteNum(uid, num)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
-
 }
 
 func UpdateUserFavoritedNum(uid int64, actionType int64) error {
@@ -156,14 +163,16 @@ func UpdateUserFavoritedNum(uid int64, actionType int64) error {
 		if err != nil {
 			return err
 		}
-		go CacheSetUserInfo(user)
-		return nil
-	}
-
-	//数据没过期,直接去缓存中更新
-	err = CacheUpdateFavoritedNum(uid, num)
-	if err != nil {
-		return err
+		err = CacheSetUserInfo(user)
+		if err != nil {
+			return err
+		}
+	} else {
+		//数据没过期,直接去缓存中更新
+		err = CacheUpdateFavoritedNum(uid, num)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -205,11 +214,9 @@ func GetUserInfo(u interface{}) (user User, err error) {
 				return
 			}
 			go CacheSetUserInfo(user)
-			log.Debug(user)
 			return
 		} else {
 			user, err = CacheGetUserInfo(u.(int64))
-			log.Debug(user)
 			if err == nil {
 				return user, nil
 			}
@@ -220,12 +227,32 @@ func GetUserInfo(u interface{}) (user User, err error) {
 	return
 }
 
-func GetUserInfoList(ids []int64) ([]*User, error) {
-	users, err := GetUserListByDB(ids)
-	if err != nil {
-		return nil, err
+func GetUserInfoList(ids []int64) ([]User, error) {
+	var users []User
+	for _, id := range ids {
+		//先查询缓存是否过期
+		flag, err := CacheCheckUser(id)
+		if err != nil {
+			return nil, err
+		}
+		if !flag {
+			user, err := GetUserInfoFromDB(id)
+			if err != nil {
+				return nil, err
+			}
+			users = append(users, user)
+			//这里不处理错误的原因是，数据库已经查询到了，不必返回错误
+			go CacheSetUserInfo(user)
+		} else {
+			//如果没过期
+			user, err := CacheGetUserInfo(id)
+			if err != nil {
+				return nil, err
+			}
+			users = append(users, user)
+		}
 	}
-	return users, err
+	return users, nil
 }
 
 func InsertUser(username string, password string) (User, error) {

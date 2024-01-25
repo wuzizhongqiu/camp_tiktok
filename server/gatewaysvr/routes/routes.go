@@ -2,6 +2,8 @@ package routes
 
 import (
 	"gatewaysvr/config"
+	"gatewaysvr/controller"
+	"gatewaysvr/utils/common"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,11 +18,11 @@ func SetRoute() *gin.Engine {
 	douyin := r.Group("/douyin")
 	{
 		UserRoutes(douyin)
-		//PublishRoutes(douyin)
+		PublishRoutes(douyin)
 		CommentRoutes(douyin)
 		FavoriteRoutes(douyin)
-		//RelationRoutes(douyin)
-		//douyin.GET("/feed/", common.AuthWithOutMiddleware(), controller.Feed)
+		RelationRoutes(douyin)
+		douyin.GET("/feed/", common.AuthWithOutMiddleware(), controller.Feed)
 	}
 
 	return r

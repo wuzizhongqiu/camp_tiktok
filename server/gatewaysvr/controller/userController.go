@@ -13,6 +13,7 @@ import (
 
 // UserLogin 用户登录
 func UserLogin(ctx *gin.Context) {
+
 	var err error
 	userName := ctx.Query("username")
 	password := ctx.Query("password")
